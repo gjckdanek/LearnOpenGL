@@ -14,19 +14,17 @@ const unsigned int SCR_HEIGHT = 600;
 const char* vertexShaderSource = 
 "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
-"out vec4 vertexColor;\n"
 "void main()\n"
 "{\n"
 "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-"	vertexColor = vec4(0.5, 0.0, 0.0, 1.0);\n"
 "}\0";
 const char* fragmentShaderSource = 
 "#version 330 core\n"
 "out vec4 FragColor;\n"
-"in vec4 vertexColor;\n"
+"uniform vec4 ourColor;\n"
 "void main()\n"
 "{\n"
-"   FragColor = vertexColor;\n"
+"   FragColor = ourColor;\n"
 "}\0";
 
 int main()
@@ -264,7 +262,21 @@ int main()
 		//); // sets the polygon rasterization mode of the active polygon primitive
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // default
 
+		// be sure to activate the shader
 		glUseProgram(shaderProgram);
+
+		// update shader uniform
+		float timeValue = glfwGetTime();
+		float greenValue = (sin(timeValue) / 2.0f) + 0.5f; // -1.0 ~ 1.0
+		int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor"); // returns the location of the uniform variable for the current program object
+		glUniform4f(
+			vertexColorLocation, // location
+			0.0f, // value, redValue
+			greenValue, // value, greenValue
+			0.0f, // value, blueValue
+			1.0f // value, alphaValue
+		); // specifies the value of a uniform variable for the current program object
+
 		glBindVertexArray(VAO);
 		glDrawElements(
 			GL_TRIANGLES,		// mode
