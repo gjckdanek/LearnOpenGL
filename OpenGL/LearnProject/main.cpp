@@ -259,6 +259,12 @@ int main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // state-setting function, Clear 색상 지정
 		glClear(GL_COLOR_BUFFER_BIT); // state-using function, 지정된 Clear 색으로 특정 Buffer 를 Clear
 
+		//glPolygonMode(
+		//	GL_FRONT_AND_BACK,	// face
+		//	GL_LINE				// mode
+		//); // sets the polygon rasterization mode of the active polygon primitive
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // default
+
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
 		glDrawElements(
