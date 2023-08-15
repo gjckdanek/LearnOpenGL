@@ -280,6 +280,15 @@ int main()
 		glfwPollEvents(); // check if any events are triggered
 	}
 
+	glBindVertexArray(0); // unbind the VAO
+	glBindBuffer(GL_VERTEX_ARRAY, 0); // unbind the VBO
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // unbind the EBO
+
+	glDeleteVertexArrays(1, &VAO); // delete the VAO
+	glDeleteBuffers(1, &VBO); // delete the VBO
+	glDeleteBuffers(1, &EBO); // delete the EBO
+	glDeleteProgram(shaderProgram); // delete the shader program
+
 	glfwTerminate(); // clean up all GLFW resources
 	return 0;
 }
