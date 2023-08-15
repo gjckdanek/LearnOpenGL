@@ -21,5 +21,14 @@
     <ClCompile Include="..\glad\src\glad.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="_1_4_hellotriangle_sol1.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="_1_4_hellotriangle_sol2.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="_1_4_hellotriangle_sol3.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
