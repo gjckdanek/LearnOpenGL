@@ -14,17 +14,20 @@ const unsigned int SCR_HEIGHT = 600;
 const char* vertexShaderSource = 
 "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
+"layout (location = 1) in vec3 aColor;\n"
+"out vec3 ourColor;"
 "void main()\n"
 "{\n"
 "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+"	ourColor = aColor;\n"
 "}\0";
 const char* fragmentShaderSource = 
 "#version 330 core\n"
 "out vec4 FragColor;\n"
-"uniform vec4 ourColor;\n"
+"in vec3 ourColor;\n"
 "void main()\n"
 "{\n"
-"   FragColor = ourColor;\n"
+"   FragColor = vec4(ourColor, 1.0);\n"
 "}\0";
 
 int main()
@@ -148,14 +151,13 @@ int main()
 	*/
 	// defines for the vertex shader
 	float vertices[] = {
-		 0.5f,  0.5f, 0.0f,  // top right
-		 0.5f, -0.5f, 0.0f,  // bottom right
-		-0.5f, -0.5f, 0.0f,  // bottom left
-		-0.5f,  0.5f, 0.0f   // top left 
+		// positions         // colors
+		 0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // bottom right
+		-0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // bottom left
+		 0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top 
 	};
 	unsigned int indices[] = {  // note that we start from 0!
-		0, 1, 3,   // first triangle
-		1, 2, 3    // second triangle
+		0, 1, 2   // first triangle
 	};
 
 	// create a vertex array object
@@ -196,10 +198,20 @@ int main()
 		3,			// size
 		GL_FLOAT,	// type - the data type of each component in the array
 		GL_FALSE,	// normalized - whether fixed-point data values should be normalized (GL_TRUE) or converted directly as fixed-point values (GL_FALSE) when they are accessed
-		3 * sizeof(float), // stride
-		(void*)0	// pointer
+		6 * sizeof(float), // stride
+		(void*)0	// offset
 	); // specifies the location and data format of the array of generic vertex attributes at index index to use when rendering
 	glEnableVertexAttribArray(0); // enables a generic vertex attribute array
+	glVertexAttribPointer(
+		1, // index, the location of the vertex attribute
+		3, 
+		GL_FLOAT, 
+		GL_FALSE, 
+		6 * sizeof(float), // stride, (vec3 position, vec3 color) => need to skip 6 floats
+		(void*)(3 * sizeof(float)) // offset, (vec3 position, vec3 color) => need to skip 3 floats
+	);
+	glEnableVertexAttribArray(1);
+
 
 	//	// 0. copy our vertices array in a buffer for OpenGL to use
 	//	glBindBuffer(GL_ARRAY_BUFFER, VBO); // bind the Vertex Buffer Object first before calling glVertexAttribPointer
@@ -266,21 +278,21 @@ int main()
 		glUseProgram(shaderProgram);
 
 		// update shader uniform
-		float timeValue = glfwGetTime();
-		float greenValue = (sin(timeValue) / 2.0f) + 0.5f; // -1.0 ~ 1.0
-		int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor"); // returns the location of the uniform variable for the current program object
-		glUniform4f(
-			vertexColorLocation, // location
-			0.0f, // value, redValue
-			greenValue, // value, greenValue
-			0.0f, // value, blueValue
-			1.0f // value, alphaValue
-		); // specifies the value of a uniform variable for the current program object
+		//float timeValue = glfwGetTime();
+		//float greenValue = (sin(timeValue) / 2.0f) + 0.5f; // -1.0 ~ 1.0
+		//int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor"); // returns the location of the uniform variable for the current program object
+		//glUniform4f(
+		//	vertexColorLocation, // location
+		//	0.0f, // value, redValue
+		//	greenValue, // value, greenValue
+		//	0.0f, // value, blueValue
+		//	1.0f // value, alphaValue
+		//); // specifies the value of a uniform variable for the current program object
 
 		glBindVertexArray(VAO);
 		glDrawElements(
 			GL_TRIANGLES,		// mode
-			6,					// count, the number of elements to be rendered
+			3,					// count, the number of elements to be rendered
 			GL_UNSIGNED_INT,	// type
 			0					// indices, element array buffer offset
 		); // draws primitives from array data
