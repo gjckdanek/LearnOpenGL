@@ -65,12 +65,6 @@ int main()
 	// register a callback function on window resize
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	// defines for the vertex shader
-	float vertices[] = {
-		-0.5f, -0.5f, 0.0f, // left
-		 0.5f, -0.5f, 0.0f, // right
-		 0.0f,  0.5f, 0.0f	// top
-	};
 	/*
 		NDC (Normalized Device Coordinates)
 		- OpenGL 은 모든 좌표를 -1.0 ~ 1.0 사이로 정규화한다. 이러한 정규화된 좌표를 NDC 라고 한다.
@@ -78,6 +72,17 @@ int main()
 		- 정규화된 좌표를 사용하면, 어떤 해상도의 모니터에서든 동일한 결과를 얻을 수 있다.
 		- NDC 는 최종적으로 screen coordinates 로 변환된다. 이러한 변환을 viewport transformation 이라고 한다.
 	*/
+	// defines for the vertex shader
+	float vertices[] = {
+		 0.5f,  0.5f, 0.0f,  // top right
+		 0.5f, -0.5f, 0.0f,  // bottom right
+		-0.5f, -0.5f, 0.0f,  // bottom left
+		-0.5f,  0.5f, 0.0f   // top left 
+	};
+	unsigned int indices[] = {  // note that we start from 0!
+		0, 1, 3,   // first triangle
+		1, 2, 3    // second triangle
+	};
 
 	// create a vertex array object
 	unsigned int VAO;
@@ -103,6 +108,12 @@ int main()
 		vertices,			// data
 		GL_STATIC_DRAW		// usage, 데이터는 한 번만 설정되고, 그 후에는 읽히기만 한다.
 	); // creates and initializes a buffer object's data store
+
+	// create an element buffer object (EBO)
+	unsigned int EBO; // element buffer object
+	glGenBuffers(1, &EBO); // generate a buffer object name
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO); // bind a named buffer object
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW); // creates and initializes a buffer object's data store
 
 	// create a vertex shader object
 	const char* vertexShaderSource = "#version 330 core\n"
@@ -220,6 +231,23 @@ int main()
 	//	glBindVertexArray(VAO);
 	//	someOpenglFunctionThatDrawsOurTriangle(); // draws the object
 
+	// ..:: Initialization code :: ..
+	// 1. bind Vertex Array Object
+	glBindVertexArray(VAO);
+	// 2. copy our vertices array in a buffer for OpenGL to use
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	// 3. copy our index array in a element buffer for OpenGL to use
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	// 4. then set the vertex attributes pointers
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	// ..:: Drawing code (in render loop) :: ..
+	glUseProgram(shaderProgram);
+	glBindVertexArray(VAO);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
 
 	// render loop
 	while (!glfwWindowShouldClose(window))
@@ -233,12 +261,13 @@ int main()
 
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
-		glDrawArrays(
-			GL_TRIANGLES,	// mode
-			0,				// first
-			3				// count
-		); // draws the triangle
-		
+		glDrawElements(
+			GL_TRIANGLES,		// mode
+			6,					// count, the number of elements to be rendered
+			GL_UNSIGNED_INT,	// type
+			0					// indices, element array buffer offset
+		); // draws primitives from array data
+		glBindVertexArray(0); // unbind the VAO
 
 		// check and call events and swap the buffers
 		glfwSwapBuffers(window); // swap the color buffer
