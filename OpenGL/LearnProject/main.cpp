@@ -3,6 +3,7 @@
 #include <glad/glad.h> // must be included before glfw3.h
 #include <glfw3.h>
 
+#include "Shader.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -77,70 +78,7 @@ int main()
 	// register a callback function on window resize
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	// create a vertex shader object
-	unsigned int vertexShader;
-	vertexShader = glCreateShader(
-		GL_VERTEX_SHADER // shader type
-	);
-	glShaderSource(
-		vertexShader,			// shader
-		1,						// the number of strings
-		&vertexShaderSource,	// an array of pointers to strings containing the source code to be loaded into the shader
-		NULL					// an array of string lengths
-	); // sets the source code in shader to the source code in the array of strings specified by string
-	glCompileShader(vertexShader); // compiles the source code strings that have been stored in the shader object specified by shader
-
-	// check for shader compile errors
-	int success;
-	char infoLog[512];
-	glGetShaderiv(
-		vertexShader,		// shader
-		GL_COMPILE_STATUS,	// pname
-		&success			// params
-	); // returns a parameter from a shader object
-	if (!success)
-	{
-		glGetShaderInfoLog(
-			vertexShader,	// shader
-			512,			// bufSize
-			NULL,			// length
-			infoLog			// infoLog
-		); // returns the information log for a shader object
-		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-
-	// create a fragment shader object
-	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
-
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-
-	// create shader program
-	unsigned int shaderProgram;
-	shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
-
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success); // check for linking errors
-	if (!success)
-	{
-		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog); // get the linking errors
-		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-	}
-
-	// activate the shader program
-	glUseProgram(shaderProgram);
-
-	// delete the shader objects once they've been linked into the program object
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
+	Shader ourShader("shaders/shader.vs", "shaders/shader.fs");
 
 	/*
 		NDC (Normalized Device Coordinates)
@@ -208,7 +146,7 @@ int main()
 		GL_FLOAT, 
 		GL_FALSE, 
 		6 * sizeof(float), // stride, (vec3 position, vec3 color) => need to skip 6 floats
-		(void*)(3 * sizeof(float)) // offset, (vec3 position, vec3 color) => need to skip 3 floats
+		(void*)(3 * sizeof(float)) // offset, (vec3 position, vec3 color) => need to skip 3 floats (12 bytes)
 	);
 	glEnableVertexAttribArray(1);
 
@@ -275,7 +213,7 @@ int main()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // default
 
 		// be sure to activate the shader
-		glUseProgram(shaderProgram);
+		ourShader.use(); // glUseProgram(shaderProgram);
 
 		// update shader uniform
 		//float timeValue = glfwGetTime();
@@ -310,7 +248,6 @@ int main()
 	glDeleteVertexArrays(1, &VAO); // delete the VAO
 	glDeleteBuffers(1, &VBO); // delete the VBO
 	glDeleteBuffers(1, &EBO); // delete the EBO
-	glDeleteProgram(shaderProgram); // delete the shader program
 
 	glfwTerminate(); // clean up all GLFW resources
 	return 0;
