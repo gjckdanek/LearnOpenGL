@@ -49,5 +49,8 @@
     <None Include="shaders\_1_5_shader_sol1.vs">
       <Filter>shader</Filter>
     </None>
+    <None Include="shaders\_1_5_shader_sol2.vs">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
 </Project>
