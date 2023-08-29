@@ -78,7 +78,8 @@ int main()
 	// register a callback function on window resize
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	Shader ourShader("shaders/_1_5_shader_sol2.vs", "shaders/shader.fs");
+	//Shader ourShader("shaders/shader.vs", "shaders/shader.fs");
+	Shader ourShader("shaders/_1_5_shader_sol3.vs", "shaders/_1_5_shader_sol3.fs");
 
 	/*
 		NDC (Normalized Device Coordinates)
@@ -211,8 +212,6 @@ int main()
 		//	GL_LINE				// mode
 		//); // sets the polygon rasterization mode of the active polygon primitive
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // default
-
-		ourShader.setVec4("offset", 0.5f, 0.f, 0.f, 0.f);
 
 		// be sure to activate the shader
 		ourShader.use(); // glUseProgram(shaderProgram);
