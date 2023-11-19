@@ -3,6 +3,9 @@
 #include <glad/glad.h> // must be included before glfw3.h
 #include <glfw3.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 #include "Shader.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -78,8 +81,8 @@ int main()
 	// register a callback function on window resize
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	//Shader ourShader("shaders/shader.vs", "shaders/shader.fs");
-	Shader ourShader("shaders/_1_5_shader_sol3.vs", "shaders/_1_5_shader_sol3.fs");
+	Shader ourShader("shaders/shader.vs", "shaders/shader.fs");
+	//Shader ourShader("shaders/_1_5_shader_sol3.vs", "shaders/_1_5_shader_sol3.fs");
 
 	/*
 		NDC (Normalized Device Coordinates)
@@ -97,6 +100,11 @@ int main()
 	};
 	unsigned int indices[] = {  // note that we start from 0!
 		0, 1, 2   // first triangle
+	};
+	float texCoords[] = {
+		0.0f, 0.0f, // lower-left corner
+		1.0f, 0.0f, // lower-right corner
+		0.5f, 1.0f  // top-center corner
 	};
 
 	// create a vertex array object
@@ -196,6 +204,49 @@ int main()
 	//	glBindVertexArray(VAO);
 	//	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	//	glBindVertexArray(0);
+
+	// load and create a texture
+	// -------------------------
+
+	unsigned int texture;
+	glGenTextures(1, &texture); // generates texture names
+
+	glBindTexture(GL_TEXTURE_2D, texture); // bind a named texture to a texturing target
+
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load("resources/container.jpg", // path
+		&width, // width
+		&height, // height
+		&nrChannels, // number of channels
+		0 // desired channels
+	); // loads an image from the file system into a buffer
+
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, // target
+			0, // level
+			GL_RGB, // internal format
+			width, // width
+			height, // height
+			0, // border
+			GL_RGB, // format
+			GL_UNSIGNED_BYTE, // type
+			data // data
+		); // creates a texture image
+		glGenerateMipmap(GL_TEXTURE_2D); // generates mipmaps for the currently bound texture object
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+
+	stbi_image_free(data); // frees image memory
 
 	// render loop
 	while (!glfwWindowShouldClose(window))

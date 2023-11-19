@@ -71,7 +71,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)..\glfw\include;$(SolutionDir)glad\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\glfw\include;$(SolutionDir)glad\include;$(SolutionDir)stb;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)..\glfw\lib;$(LibraryPath)</LibraryPath>
     <SourcePath>$(SolutionDir)glad\src;$(SourcePath)</SourcePath>
   </PropertyGroup>
@@ -148,6 +148,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\stb\stb_image.h" />
     <ClInclude Include="Shader.h" />
   </ItemGroup>
   <ItemGroup>
