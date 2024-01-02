@@ -230,6 +230,7 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	
 	int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(true); // flips the loaded image vertically since OpenGL expects the 0.0 coordinate on the y-axis to be on the bottom side of the image
 	unsigned char* data = stbi_load("resources/container.jpg", // path
 		&width, // width
 		&height, // height
@@ -258,6 +259,21 @@ int main()
 
 	stbi_image_free(data); // frees image memory
 
+	unsigned int texture2;
+	glGenTextures(1, &texture2); // generates texture names
+	glBindTexture(GL_TEXTURE_2D, texture2); // bind a named texture to a texturing target
+	unsigned char* data2 = stbi_load("resources/awesomeface.png", &width, &height, &nrChannels, 0);
+	if (data2)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data2);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data2); // frees image memory
+
 	// render loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -274,7 +290,10 @@ int main()
 		//); // sets the polygon rasterization mode of the active polygon primitive
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // default
 
+		glActiveTexture(GL_TEXTURE0); // activates the texture unit
 		glBindTexture(GL_TEXTURE_2D, texture); // bind a named texture to a texturing target
+		glActiveTexture(GL_TEXTURE1); // activates the texture unit
+		glBindTexture(GL_TEXTURE_2D, texture2); // bind a named texture to a texturing target
 
 		// be sure to activate the shader
 		ourShader.use(); // glUseProgram(shaderProgram);
@@ -290,6 +309,9 @@ int main()
 		//	0.0f, // value, blueValue
 		//	1.0f // value, alphaValue
 		//); // specifies the value of a uniform variable for the current program object
+
+		glUniform1i(glGetUniformLocation(ourShader.ID, "texture1"), 0); // set it manually
+		ourShader.setInt("texture2", 1); // or with shader class
 
 		glBindVertexArray(VAO);
 		glDrawElements(
