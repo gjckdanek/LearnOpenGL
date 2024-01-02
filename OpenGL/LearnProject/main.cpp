@@ -15,6 +15,9 @@ void processInput(GLFWwindow* window);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
+// stores how much we're seeing of either texture
+float mixValue = 0.2f;
+
 const char* vertexShaderSource = 
 "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
@@ -81,8 +84,8 @@ int main()
 	// register a callback function on window resize
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	Shader ourShader("shaders/shader.vs", "shaders/shader.fs");
-	//Shader ourShader("shaders/shader.vs", "shaders/_1_6_shader_sol1.fs");
+	//Shader ourShader("shaders/shader.vs", "shaders/shader.fs");
+	Shader ourShader("shaders/shader.vs", "shaders/_1_6_shader_sol4.fs");
 
 	/*
 		NDC (Normalized Device Coordinates)
@@ -94,10 +97,10 @@ int main()
 	// defines for the vertex shader
 	float vertices[] = {
 		// positions          // colors           // texture coords
-		 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   0.55f, 0.55f,   // top right
-		 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   0.55f, 0.45f,   // bottom right
-		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.45f, 0.45f,   // bottom left
-		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.45f, 0.55f    // top left 
+		 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+		 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
 	};
 	unsigned int indices[] = {  // note that we start from 0!
 		0, 1, 3,	// first triangle
@@ -227,8 +230,8 @@ int main()
 	// set the texture wrapping parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	
 	int width, height, nrChannels;
 	stbi_set_flip_vertically_on_load(true); // flips the loaded image vertically since OpenGL expects the 0.0 coordinate on the y-axis to be on the bottom side of the image
@@ -265,8 +268,8 @@ int main()
 	glBindTexture(GL_TEXTURE_2D, texture2); // bind a named texture to a texturing target
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	unsigned char* data2 = stbi_load("resources/awesomeface.png", &width, &height, &nrChannels, 0);
 	if (data2)
 	{
@@ -317,6 +320,7 @@ int main()
 
 		glUniform1i(glGetUniformLocation(ourShader.ID, "texture1"), 0); // set it manually
 		ourShader.setInt("texture2", 1); // or with shader class
+		ourShader.setFloat("mixValue", mixValue);
 
 		glBindVertexArray(VAO);
 		glDrawElements(
@@ -355,5 +359,22 @@ void processInput(GLFWwindow* window)
 	{
 		// close the window
 		glfwSetWindowShouldClose(window, true);
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+	{
+		mixValue += 0.001f; // change this value accordingly (might be too slow or too fast based on system hardware)
+		if (mixValue >= 1.0f)
+		{
+			mixValue = 1.0f;
+		}
+	}
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+	{
+		mixValue -= 0.001f;
+		if (mixValue >= 1.0f)
+		{
+			mixValue = 1.0f;
+		}
 	}
 }
