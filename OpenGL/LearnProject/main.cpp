@@ -81,7 +81,8 @@ int main()
 	// register a callback function on window resize
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	Shader ourShader("shaders/shader.vs", "shaders/shader.fs");
+	//Shader ourShader("shaders/shader.vs", "shaders/shader.fs");
+	Shader ourShader("shaders/shader.vs", "shaders/_1_6_shader_sol1.fs");
 
 	/*
 		NDC (Normalized Device Coordinates)

@@ -61,5 +61,8 @@
     <None Include="shaders\_1_5_shader_sol3.fs">
       <Filter>shader</Filter>
     </None>
+    <None Include="shaders\_1_6_shader_sol1.fs">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
 </Project>
