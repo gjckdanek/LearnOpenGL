@@ -82,7 +82,6 @@ int main()
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	Shader ourShader("shaders/shader.vs", "shaders/shader.fs");
-	//Shader ourShader("shaders/_1_5_shader_sol3.vs", "shaders/_1_5_shader_sol3.fs");
 
 	/*
 		NDC (Normalized Device Coordinates)
@@ -93,13 +92,15 @@ int main()
 	*/
 	// defines for the vertex shader
 	float vertices[] = {
-		// positions         // colors
-		 0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // bottom right
-		-0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // bottom left
-		 0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top 
+		// positions          // colors           // texture coords
+		 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+		 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
 	};
 	unsigned int indices[] = {  // note that we start from 0!
-		0, 1, 2   // first triangle
+		0, 1, 3,	// first triangle
+		1, 2, 3		// second triangle
 	};
 	float texCoords[] = {
 		0.0f, 0.0f, // lower-left corner
@@ -145,7 +146,7 @@ int main()
 		3,			// size
 		GL_FLOAT,	// type - the data type of each component in the array
 		GL_FALSE,	// normalized - whether fixed-point data values should be normalized (GL_TRUE) or converted directly as fixed-point values (GL_FALSE) when they are accessed
-		6 * sizeof(float), // stride
+		8 * sizeof(float), // stride
 		(void*)0	// offset
 	); // specifies the location and data format of the array of generic vertex attributes at index index to use when rendering
 	glEnableVertexAttribArray(0); // enables a generic vertex attribute array
@@ -154,10 +155,19 @@ int main()
 		3, 
 		GL_FLOAT, 
 		GL_FALSE, 
-		6 * sizeof(float), // stride, (vec3 position, vec3 color) => need to skip 6 floats
+		8 * sizeof(float), // stride, (vec3 position, vec3 color) => need to skip 6 floats
 		(void*)(3 * sizeof(float)) // offset, (vec3 position, vec3 color) => need to skip 3 floats (12 bytes)
 	);
 	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(
+		2, // index, the location of the vertex attribute
+		2, 
+		GL_FLOAT, 
+		GL_FALSE, 
+		8 * sizeof(float), // stride, (vec3 position, vec3 color, vec2 texCoords) => need to skip 5 floats
+		(void*)(6 * sizeof(float)) // offset, (vec3 position, vec3 color, vec2 texCoords) => need to skip 3 floats (12 bytes)
+	);
+	glEnableVertexAttribArray(2);
 
 
 	//	// 0. copy our vertices array in a buffer for OpenGL to use
@@ -264,6 +274,8 @@ int main()
 		//); // sets the polygon rasterization mode of the active polygon primitive
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // default
 
+		glBindTexture(GL_TEXTURE_2D, texture); // bind a named texture to a texturing target
+
 		// be sure to activate the shader
 		ourShader.use(); // glUseProgram(shaderProgram);
 
@@ -282,7 +294,7 @@ int main()
 		glBindVertexArray(VAO);
 		glDrawElements(
 			GL_TRIANGLES,		// mode
-			3,					// count, the number of elements to be rendered
+			6,					// count, the number of elements to be rendered
 			GL_UNSIGNED_INT,	// type
 			0					// indices, element array buffer offset
 		); // draws primitives from array data
